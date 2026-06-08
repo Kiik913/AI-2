@@ -3,6 +3,7 @@ from datetime import datetime, date
 import os
 import math
 import urllib.parse
+import subprocess
 
 # ==============================
 # CONFIGURATION
@@ -14,6 +15,7 @@ WIKIPEDIA_URL = "https://www.wikipedia.org/"
 WIKIPEDIA_SEARCH_BASE = "https://en.wikipedia.org/wiki/"
 
 PROMPT_HISTORY_FILE = "prompts_history.txt"
+FAVORITES_FILE = "favorites_prompts.txt"
 
 # Fixed history folder on your Windows user account
 HISTORY_DIR = r"C:\Users\HP\AI 2 History"
@@ -26,10 +28,25 @@ APP_HISTORY_FILE = os.path.join(HISTORY_DIR, "AI 2 history.txt")
 
 def log_history(message: str) -> None:
     """Append a line to AI 2 history.txt with timestamp in fixed folder."""
-    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # standard format[web:199][web:200]
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     line = f"[{ts}] {message}\n"
     with open(APP_HISTORY_FILE, "a", encoding="utf-8") as f:
         f.write(line)
+
+# ==============================
+# SIMPLE CLIPBOARD (Windows)
+# ==============================
+
+def copy_to_clipboard(text: str) -> None:
+    """
+    Copy text to clipboard on Windows using 'clip' command.
+    If it fails, just log the error and continue normally.
+    """
+    try:
+        subprocess.run("clip", universal_newlines=True, input=text)
+        log_history("Copied prompt to clipboard using clip command")
+    except Exception as e:
+        log_history(f"Clipboard copy failed: {e}")
 
 # ==============================
 # FESTIVALS (India 2026 + World Fixed-Date)
@@ -301,7 +318,7 @@ def run_google_products_menu():
 
     product_name, product_url = products[pidx]
     print(f"\nOpening {product_name} in your browser...\n")
-    webbrowser.open(product_url)  # standard way to open URLs[web:198][web:113]
+    webbrowser.open(product_url)
     log_history(f"Opened Google product: {product_name} ({product_url})")
     input("Press Enter to return to the main menu...")
 
@@ -354,37 +371,106 @@ def show_datetime_and_festival():
     input("Press Enter to go back to the main menu...")
 
 # ==============================
-# PROMPT GENERATOR
+# PROMPT GENERATOR (with styles, clipboard, favorites, auto-Perchance)
 # ==============================
 
-def generate_prompt(short_idea: str) -> str:
-    base = (
-        "high quality, ultra detailed, 4k, masterpiece, dramatic lighting, "
-        "beautiful composition, sharp focus, extremely sharp, crisp details, "
+def generate_prompt(short_idea: str, style: str = "default") -> str:
+    base_common = (
+        "high quality, ultra detailed, 4k, masterpiece, beautiful composition, "
+        "sharp focus, crisp details, "
     )
-    return base + short_idea.strip()
 
-def save_prompt(short_idea: str, prompt: str) -> None:
+    if style == "anime":
+        style_txt = "anime style, vibrant colors, clean lines, sharp anime shading, "
+    elif style == "photo":
+        style_txt = "photorealistic, DSLR, shallow depth of field, natural lighting, "
+    elif style == "pixel":
+        style_txt = "pixel art, 16-bit game style, crisp pixels, limited color palette, "
+    elif style == "cinematic":
+        style_txt = "cinematic lighting, movie poster, dramatic shadows, high contrast, "
+    else:
+        style_txt = ""
+
+    return base_common + style_txt + short_idea.strip()
+
+def save_prompt(short_idea: str, prompt: str, style: str) -> None:
     is_new_file = not os.path.exists(PROMPT_HISTORY_FILE)
     with open(PROMPT_HISTORY_FILE, "a", encoding="utf-8") as f:
         if is_new_file:
             f.write("Prompt Generator History\n")
             f.write("========================\n\n")
         f.write(f"Time: {datetime.now().isoformat(timespec='seconds')}\n")
+        f.write(f"Style: {style}\n")
         f.write(f"Short idea: {short_idea}\n")
         f.write(f"Generated prompt: {prompt}\n")
         f.write("-" * 40 + "\n\n")
 
+def save_favorite(short_idea: str, prompt: str, style: str) -> None:
+    is_new_file = not os.path.exists(FAVORITES_FILE)
+    with open(FAVORITES_FILE, "a", encoding="utf-8") as f:
+        if is_new_file:
+            f.write("Favorite Prompts\n")
+            f.write("================\n\n")
+        f.write(f"Time: {datetime.now().isoformat(timespec='seconds')}\n")
+        f.write(f"Style: {style}\n")
+        f.write(f"Short idea: {short_idea}\n")
+        f.write(f"Prompt: {prompt}\n")
+        f.write("-" * 40 + "\n\n")
+    log_history(f"Saved favorite prompt (style={style}, idea={short_idea})")
+
+def view_favorites():
+    print("==============================================")
+    print("  Favorite Prompts")
+    print("==============================================\n")
+
+    if not os.path.exists(FAVORITES_FILE):
+        print("No favorite prompts saved yet.\n")
+        log_history("Viewed favorites: none yet")
+        input("Press Enter to return to the main menu...")
+        return
+
+    with open(FAVORITES_FILE, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    print(content)
+    log_history("Viewed favorites prompts file")
+    input("Press Enter to return to the main menu...")
+
 def run_prompt_helper():
     print("==============================================")
-    print("  Prompt + Image Helper")
+    print("  Prompt + Image Helper (Auto Perchance)")
     print("==============================================\n")
-    print("You can:")
-    print("  1) Generate a long prompt from a short idea")
-    print("  2) Open Perchance (Stable Diffusion) to generate images")
-    print("  3) Open Stable Diffusion Web as a second image site\n")
+    print("Flow:")
+    print("  1) Choose a style")
+    print("  2) Enter a short idea")
+    print("  3) AI 2 generates a long prompt")
+    print("  4) Prompt is copied to clipboard (Windows)")
+    print("  5) Perchance (Stable Diffusion) opens automatically\n")
+
+    style_map = {
+        "1": "default",
+        "2": "photo",
+        "3": "anime",
+        "4": "pixel",
+        "5": "cinematic",
+    }
 
     while True:
+        print("Choose style:")
+        print("  1) Default")
+        print("  2) Realistic Photo")
+        print("  3) Anime")
+        print("  4) Pixel Art")
+        print("  5) Cinematic")
+        print("  0) Back\n")
+
+        style_choice = input("Style number: ").strip()
+        if style_choice == "0":
+            log_history("Exited Prompt + Image Helper")
+            break
+
+        style = style_map.get(style_choice, "default")
+
         idea = input("Enter a short idea (or 'back' to return): ").strip()
         if idea.lower() == "back":
             log_history("Exited Prompt + Image Helper")
@@ -393,34 +479,34 @@ def run_prompt_helper():
             print("Please type something.\n")
             continue
 
-        log_history(f"Prompt idea entered: {idea}")
-        prompt = generate_prompt(idea)
+        log_history(f"Prompt idea entered: {idea} (style={style})")
+        prompt = generate_prompt(idea, style)
         print("\nGenerated prompt:\n")
         print(prompt)
         print()
 
-        save_prompt(idea, prompt)
+        # Save to history file
+        save_prompt(idea, prompt, style)
         log_history("Generated prompt and saved to prompt history file")
         print("Saved to history file.\n")
 
-        print("What do you want to do now?")
-        print("  1. Just keep the prompt here (copy manually)")
-        print("  2. Open Perchance (Stable Diffusion)")
-        print("  3. Open Stable Diffusion Web")
-        choice = input("Choose 1, 2, or 3: ").strip()
+        # Copy to clipboard (Windows)
+        copy_to_clipboard(prompt)
+        print("Prompt copied to clipboard. Press Ctrl+V in Perchance.\n")
 
-        if choice == "2":
-            print("\nOpening Perchance in your browser...")
-            webbrowser.open(PERCHANCE_URL)
-            log_history("Opened Perchance from Prompt Helper")
-            print("Paste the prompt into the Description box and click Generate.\n")
-        elif choice == "3":
-            print("\nOpening Stable Diffusion Web in your browser...")
-            webbrowser.open(STABLE_DIFFUSION_WEB_URL)
-            log_history("Opened Stable Diffusion Web from Prompt Helper")
-            print("Paste the prompt and generate images there.\n")
+        # Ask to save as favorite
+        fav_choice = input("Save this prompt as a favorite? (y/n): ").strip().lower()
+        if fav_choice == "y":
+            save_favorite(idea, prompt, style)
+            print("Saved as favorite.\n")
         else:
-            print("Okay, you can copy the prompt from here.\n")
+            print("Not saved as favorite.\n")
+
+        # Auto-open Perchance
+        print("Opening Perchance (Stable Diffusion) in your browser...")
+        webbrowser.open(PERCHANCE_URL)
+        log_history("Opened Perchance automatically after generating prompt")
+        print("Paste the prompt into the prompt/description box and click Generate.\n")
 
 # ==============================
 # MATH SOLVER
@@ -769,6 +855,9 @@ def show_credits():
     print("Assistant / ideas: Perplexity AI\n")
     print("Main Features:")
     print(" - Prompt generator for AI images (Perchance, Stable Diffusion Web)")
+    print(" - Prompt styles (default, photo, anime, pixel, cinematic)")
+    print(" - Auto-copy prompt to clipboard (Windows) + auto-open Perchance")
+    print(" - Favorite prompts list and viewer")
     print(" - Math tools and formulas (basic to class 12 style)")
     print(" - Physics formulas (school level)")
     print(" - Quick launchers for Google & Workspace apps")
@@ -799,49 +888,52 @@ def main():
         print("==============================================")
         print("  AI 2: Prompts + Math + Google + Wiki + Festivals")
         print("==============================================")
-        print("1. Prompt + Image Helper")
-        print("2. Math Solver (Calculator)")
-        print("3. Extra Math Tools")
-        print("4. Math Formulas")
-        print("5. Physics Formulas")
-        print("6. Date / Time / Festivals (India + World)")
-        print("7. Wikipedia Home")
-        print("8. Wikipedia Search")
-        print("9. Google Products")
-        print("10. Aura Lab / Social Links")
-        print("11. Credits")
-        print("12. Exit")
-        choice = input("Choose 1-12: ").strip()
+        print("1. Prompt + Image Helper (auto Perchance)")
+        print("2. View Favorite Prompts")
+        print("3. Math Solver (Calculator)")
+        print("4. Extra Math Tools")
+        print("5. Math Formulas")
+        print("6. Physics Formulas")
+        print("7. Date / Time / Festivals (India + World)")
+        print("8. Wikipedia Home")
+        print("9. Wikipedia Search")
+        print("10. Google Products")
+        print("11. Aura Lab / Social Links")
+        print("12. Credits")
+        print("13. Exit")
+        choice = input("Choose 1-13: ").strip()
         log_history(f"Main menu choice: {choice}")
 
         if choice == "1":
             run_prompt_helper()
         elif choice == "2":
-            run_math_solver()
+            view_favorites()
         elif choice == "3":
-            run_extra_math_tools()
+            run_math_solver()
         elif choice == "4":
-            show_basic_formulas()
+            run_extra_math_tools()
         elif choice == "5":
-            show_physics_formulas()
+            show_basic_formulas()
         elif choice == "6":
-            show_datetime_and_festival()
+            show_physics_formulas()
         elif choice == "7":
-            run_wikipedia_home()
+            show_datetime_and_festival()
         elif choice == "8":
-            run_wikipedia_search()
+            run_wikipedia_home()
         elif choice == "9":
-            run_google_products_menu()
+            run_wikipedia_search()
         elif choice == "10":
-            run_aura_links()
+            run_google_products_menu()
         elif choice == "11":
-            show_credits()
+            run_aura_links()
         elif choice == "12":
+            show_credits()
+        elif choice == "13":
             print("Goodbye!")
             log_history("=== AI 2 app exited by user ===")
             break
         else:
-            print("Invalid choice. Enter 1-12.\n")
+            print("Invalid choice. Enter 1-13.\n")
             log_history(f"Invalid main menu choice: {choice}")
 
 if __name__ == "__main__":
