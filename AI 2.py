@@ -710,7 +710,7 @@ def show_basic_formulas():
 
     print("5) Coordinate Geometry:")
     print("   - Distance: d = √[(x2 - x1)^2 + (y2 - y1)^2]")
-    print("   - Midpoint: M = ((x1 + x2)/2, (y1 + y2)/2)")
+    print("   - Midpoint: M = ((x1 + x2)/2, (x1 + y2)/2)")
     print("   - Slope: m = (y2 - y1) / (x2 - x1)\n")
 
     print("6) Calculus (basic):")
@@ -843,6 +843,65 @@ def run_aura_links():
     input("Press Enter to return to the main menu...")
 
 # ==============================
+# HELP / TUTORIAL
+# ==============================
+
+def show_help():
+    print("==============================================")
+    print("  Help – How to use AI 2")
+    print("==============================================\n")
+
+    print("1) Prompt + Image Helper (auto Perchance)")
+    print("   - From main menu, choose option 1.")
+    print("   - Choose a style: Default, Photo, Anime, Pixel, Cinematic.")
+    print("   - Type a short idea (example: 'cute anime cat in neon city').")
+    print("   - AI 2 generates a long, detailed prompt for Stable Diffusion.")
+    print("   - The prompt is automatically copied to your clipboard (Windows).")
+    print("   - Perchance (Stable Diffusion, free, no login) opens in your browser.")
+    print("   - Press Ctrl+V in the Perchance prompt box and click Generate.\n")
+
+    print("2) Favorite Prompts")
+    print("   - After a prompt is generated, you can choose to save it as a favorite.")
+    print("   - All favorites are stored in the file:")
+    print("       favorites_prompts.txt")
+    print("   - From main menu, option 2: 'View Favorite Prompts' shows all saved prompts.\n")
+
+    print("3) History & Logs")
+    print("   - Every action (menu choices, prompts, math, links) is logged to:")
+    print("       C:\\Users\\HP\\AI 2 History\\AI 2 history.txt")
+    print("   - Prompt history (every generated prompt) is stored in:")
+    print("       prompts_history.txt")
+    print("   - You can open these files in Notepad to review everything AI 2 did.\n")
+
+    print("4) Festivals & Date/Time")
+    print("   - Main menu option 7: 'Date / Time / Festivals (India + World)'.")
+    print("   - Shows today’s date, time, and any fixed-date festivals for 2026.")
+    print("   - Includes separate lists for India festivals and world fixed-date days.")
+    print("   - Also shows a note explaining movable festivals (like Diwali, Eid, etc.).\n")
+
+    print("5) Study Tools (Math & Physics)")
+    print("   - Math Solver (option 3): quick calculator with safe math expressions.")
+    print("   - Extra Math Tools (option 4): quadratic solver and area/perimeter helper.")
+    print("   - Math Formulas (option 5): basic to Class 12 style formulas.")
+    print("   - Physics Formulas (option 6): school-level motion, energy, electricity.\n")
+
+    print("6) Quick Web Shortcuts")
+    print("   - Wikipedia Home & Search (options 8 and 9) open Wikipedia in your browser.")
+    print("   - Google Products (option 10) opens many Google / Workspace apps.")
+    print("   - Aura Lab / Social Links (option 11) open your CodePen, Instagram, GitHub, etc.\n")
+
+    print("7) Aura Lab Hub")
+    print("   - AI 2 is your offline hub for:")
+    print("       * Image prompts for Perchance / Stable Diffusion")
+    print("       * Study help (math, physics, formulas)")
+    print("       * Quick launchers for Google, Wiki, and your Aura Lab links")
+    print("       * History of what you did, saved on your own PC")
+    print("   - Think of it as the command center for Aura Lab / Care Lab Studio.\n")
+
+    input("Press Enter to return to the main menu...")
+    log_history("Viewed Help / Tutorial")
+
+# ==============================
 # CREDITS
 # ==============================
 
@@ -899,9 +958,10 @@ def main():
         print("9. Wikipedia Search")
         print("10. Google Products")
         print("11. Aura Lab / Social Links")
-        print("12. Credits")
-        print("13. Exit")
-        choice = input("Choose 1-13: ").strip()
+        print("12. Help – How to use AI 2")
+        print("13. Credits")
+        print("14. Exit")
+        choice = input("Choose 1-14: ").strip()
         log_history(f"Main menu choice: {choice}")
 
         if choice == "1":
@@ -927,13 +987,15 @@ def main():
         elif choice == "11":
             run_aura_links()
         elif choice == "12":
-            show_credits()
+            show_help()
         elif choice == "13":
+            show_credits()
+        elif choice == "14":
             print("Goodbye!")
             log_history("=== AI 2 app exited by user ===")
             break
         else:
-            print("Invalid choice. Enter 1-13.\n")
+            print("Invalid choice. Enter 1-14.\n")
             log_history(f"Invalid main menu choice: {choice}")
 
 if __name__ == "__main__":
