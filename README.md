@@ -4,13 +4,15 @@ AI 2 is a Python command‑line assistant that combines AI‑style prompt genera
 
 It is designed for quick daily use: generate prompts for image models, solve math, open Google apps fast, check today’s date/time and festivals (India + world), and keep a personal activity log on your own machine.[web:206][web:209]
 
+> If you want to explore a more advanced version, also see: **AI‑23‑V.10.1.0** – [https://github.com/Kiik913/AI-23-V.10.1.0](https://github.com/Kiik913/AI-23-V.10.1.0)
+
 ---
 
 ## Features
 
 - **Prompt + Image Helper**
   - Turn a short idea into a long, detailed prompt.
-  - Open **Perchance Stable Diffusion** and **StableDiffusionWeb** directly from the app to generate images.
+  - Open **Perchance Stable Diffusion** (free, no sign‑up, no limits) and **StableDiffusionWeb** directly from the app to generate images.[web:31]
   - Save all prompt ideas and generated prompts to `prompts_history.txt`.
 
 - **Math Tools**
@@ -30,7 +32,7 @@ It is designed for quick daily use: generate prompts for image models, solve mat
 
 - **Google & Workspace Launchers**
   - Fast open for main Google services:
-    - Google Search, Gmail, Maps, YouTube, Drive, Calendar, Docs, Sheets, Slides, Photos, Forms, Sites, and more.[web:113][web:198]
+    - Google Search, Gmail, Maps, YouTube, Drive, Calendar, Docs, Sheets, Slides, Photos, Forms, Sites, and more.[web:113][web:300]
   - Google Workspace (India) links:
     - Workspace Gmail, Drive, Meet, Calendar, Chat, Docs, Sheets, Slides, Vids, Keep, Sites, Forms, Tasks, NotebookLM, AppSheet, Workspace Marketplace.
 
@@ -166,7 +168,7 @@ AI 2: Prompts + Math + Google + Wiki + Festivals
 
 - **Open Google/Workspace apps**
   1. Choose `9` (Google Products).
-  2. Select a category (Main Google Apps, Workspace, AI & Labs, etc.).
+  2. Select a category (Main Google Apps, Workspace, AI & Labs, etc.).[web:300]
   3. Pick the specific service to open in your default browser.
 
 - **Open Aura Lab links**
@@ -231,25 +233,27 @@ Possible future improvements:
 
 Aura Lab / Care Lab links:
 
-- Cares & Laughs 2 (CodePen): https://codepen.io/Kavyant-Kumar/pen/dPOXwmY  
-- Cares & Laughs 1 (CodePen): https://codepen.io/Kavyant-Kumar/pen/dPGJPKj  
-- Instagram: https://www.instagram.com/kavyanthub/  
-- Facebook: https://www.facebook.com/profile.php?id=61586003535719  
-- GitHub: https://github.com/Kiik913  
+- Cares & Laughs 2 (CodePen): <https://codepen.io/Kavyant-Kumar/pen/dPOXwmY>  
+- Cares & Laughs 1 (CodePen): <https://codepen.io/Kavyant-Kumar/pen/dPGJPKj>  
+- Instagram: <https://www.instagram.com/kavyanthub/>  
+- Facebook: <https://www.facebook.com/profile.php?id=61586003535719>  
+- GitHub: <https://github.com/Kiik913>  
 - Aura Lab Discord server (channel link)  
-- YouTube: https://www.youtube.com/@CareLabStudio  
-- Many cool projects and ideas also live in the **Sekai** app.
+- YouTube: <https://www.youtube.com/@CareLabStudio>  
+- Many cool projects and ideas also live in the **Sekai** app.  
+
+Related project:
+
+- **AI‑23‑V.10.1.0:** <https://github.com/Kiik913/AI-23-V.10.1.0>
 
 ---
 
 ## License
 
-Choose a license you prefer (MIT is common for small tools).[web:206]
+Choose a license you prefer (MIT is common for small tools).[web:296][web:301]
 
 Example MIT section:
 
 ```text
-This project is licensed under the MIT License – see the LICENSE file for details.
+This project is licensed under the MIT License – see the LICENSE file for details.                                                              (If you want AI-23-V.10.1.0 here is the link:- [https://github.com/Kiik913/AI-23-V.10.1.0-](https://github.com/Kiik913/AI-23-V.10.1.0-))
 ```
-
-(If you want AI-23-V.10.1.0 here is the link:- https://github.com/Kiik913/AI-23-V.10.1.0-)
