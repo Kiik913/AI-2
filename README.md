@@ -1,231 +1,106 @@
-# AI 2 – Aura Lab CLI Assistant
+# 🤖 AI 2 - Your Local AI Assistant
 
-AI 2 is a Python command‑line assistant that combines AI‑style prompt generation, math tools, Google & Workspace launchers, a festivals calendar, and full local history logging – all in one simple terminal app.
+A powerful Python-based AI application with multiple features including prompts, math, video generation, chat, and history logging.
 
-It is designed for quick daily use: generate prompts for image models, solve math, open Google apps fast, check today’s date/time and festivals (India + world), and keep a personal activity log on your own machine.[web:206][web:209]
+## ✨ Features
 
-> If you want to explore a more advanced version, also see: **AI‑23‑V.10.1.0** – [https://github.com/Kiik913/AI-23-V.10.1.0](https://github.com/Kiik913/AI-23-V.10.1.0)
+- **1️⃣ AI Prompts**: Get smart answers and help with tasks
+- **2️⃣ Math Solver**: Solve complex math problems
+- **3️⃣ AI Video**: Text-to-video generation with HunyuanVideo
+- **4️⃣ Gemma 4 Chat**: Local offline AI chat with Google's Gemma 4
+- **5️⃣ History Logger**: Track all your conversations and actions
+- **6️⃣ Google & Wiki**: Search Google and Wikipedia integration
+- **7️⃣ Festivals**: Get information about festivals and events
 
----
+## 🚀 Installation
 
-## Features
-
-- **Prompt + Image Helper**
-  - Turn a short idea into a long, detailed prompt.
-  - Open **Perchance Stable Diffusion** (free, no sign‑up, no limits) and **StableDiffusionWeb** directly from the app to generate images.[web:31]
-  - Save all prompt ideas and generated prompts to `prompts_history.txt`.
-
-- **Math Tools**
-  - Simple calculator using safe math evaluation.
-  - Extra tools:
-    - Quadratic equation solver.
-    - Area & perimeter helper (rectangle, circle, triangle).
-  - Quick **math formula sheet** (basic to class 12 style).
-  - Basic **physics formula sheet** (motion, force, energy, electricity).
-
-- **Date / Time / Festivals**
-  - Shows:
-    - Current day, date, month, year.
-    - Time in **24‑hour** and **12‑hour (AM/PM)** formats.
-  - India‑focused festivals list for **2026** (month‑wise) plus selected world fixed‑date festivals.
-  - Notes for movable festivals (Ramadan, Eid, Diwali, Easter, etc.) whose dates change every year.
-
-- **Google & Workspace Launchers**
-  - Fast open for main Google services:
-    - Google Search, Gmail, Maps, YouTube, Drive, Calendar, Docs, Sheets, Slides, Photos, Forms, Sites, and more.[web:113][web:300]
-  - Google Workspace (India) links:
-    - Workspace Gmail, Drive, Meet, Calendar, Chat, Docs, Sheets, Slides, Vids, Keep, Sites, Forms, Tasks, NotebookLM, AppSheet, Workspace Marketplace.
-
-- **Wikipedia Tools**
-  - Open Wikipedia home.
-  - Direct search: type a topic, it opens the matching Wikipedia page in your browser.
-
-- **Aura Lab / Social Links**
-  - Central menu for your personal links:
-    - Aura Lab: **Cares & Laughs 1 & 2** (CodePen)
-    - Instagram, Facebook, GitHub
-    - Aura Lab Discord server
-    - Care Lab Studio YouTube channel
-    - Note about the Sekai app (search from your app store)
-
-- **History Logging**
-  - All app activity is logged with timestamps into:
-    - `C:\Users\HP\AI 2 History\AI 2 history.txt`
-  - Logs:
-    - Main menu choices
-    - Prompt ideas and generation
-    - Math expressions and results/errors
-    - Google/Wiki/links opened
-  - The same folder is intended as a place to store your own **screenshots** from any device, so everything is collected together.
-
----
-
-## Folder Structure
-
-Example layout:
-
-```text
-AI-2/
-├─ AI 2.py                # main Python script (CLI app)
-├─ prompts_history.txt    # auto‑created prompt history
-├─ README.md              # this file
-└─ (created at runtime)
-   C:\Users\HP\AI 2 History\
-       AI 2 history.txt   # main activity log with timestamps
-       (your screenshots) # you can manually drop images here
-```
-
-> Note: `C:\Users\HP\AI 2 History` is created automatically when you run the app on Windows. You can change the base path in the code if needed.
-
----
-
-## Requirements
-
-- **Python 3.8+** (any recent 3.x should work)
-- Standard library only (no external packages):
-  - `webbrowser`, `datetime`, `os`, `math`, `urllib.parse`.[web:198][web:199]
-
-No extra installations are required – just Python.
-
----
-
-## Installation
-
-1. **Clone the repository**
+### Prerequisites
 
 ```bash
-git clone https://github.com/<your-username>/<your-repo-name>.git
-cd <your-repo-name>
+pip install -U transformers==5.5.0 torch accelerate torchvision
 ```
 
-2. **Make sure Python is installed**
+### Set Hugging Face Token
 
-On Windows:
-
-```bash
-python --version
-```
-
-If `python` doesn’t work, try:
-
-```bash
-py --version
-```
-
-3. (Optional) Create and activate a virtual environment if you want an isolated setup.
-
----
-
-## Usage
-
-From the project folder, run:
-
-```bash
-python "AI 2.py"
-```
-
-or on some Windows setups:
-
-```bash
-py "AI 2.py"
-```
-
-You’ll see a menu similar to:
-
-```text
-AI 2: Prompts + Math + Google + Wiki + Festivals
-1. Prompt + Image Helper
-2. Math Solver (Calculator)
-3. Extra Math Tools
-4. Math Formulas
-5. Physics Formulas
-6. Date / Time / Festivals (India + World)
-7. Wikipedia Home
-8. Wikipedia Search
-9. Google Products
-10. Aura Lab / Social Links
-11. Credits
-12. Exit
-```
-
-### Common flows
-
-- **Generate an AI image prompt**
-  1. Choose `1` (Prompt + Image Helper).
-  2. Type a short idea (e.g. `cyberpunk city at night`).
-  3. Copy the generated long prompt.
-  4. Optionally choose to open Perchance or StableDiffusionWeb and paste the prompt.
-
-- **Quick math**
-  1. Choose `2` (Math Solver).
-  2. Type expressions like `2+3*4`, `(5**2 + 3)/4`, or `sqrt(16) + sin(0.5)`.
-  3. Type `back` to return.
-
-- **Check today’s date/time and festivals**
-  1. Choose `6`.
-  2. See current day/date/time in both 24h and 12h formats.
-  3. See all India + world fixed‑date festivals for today (if any) and a note about movable festivals.
-
-- **Open Google/Workspace apps**
-  1. Choose `9` (Google Products).
-  2. Select a category (Main Google Apps, Workspace, AI & Labs, etc.).[web:300]
-  3. Pick the specific service to open in your default browser.
-
-- **Open Aura Lab links**
-  1. Choose `10`.
-  2. Pick the CodePen, social, Discord, or YouTube link you want.
-  3. Browser opens directly to that link.
-
----
-
-## Configuration
-
-Some things you might want to change:
-
-- **History folder**
-
-In `AI 2.py`:
+1. Create token at: https://huggingface.co/settings/tokens
+2. Token type: **Read**
+3. Add to your script:
 
 ```python
-HISTORY_DIR = r"C:\Users\HP\AI 2 History"
+os.environ['HF_TOKEN'] = 'hf_your_token_here'
 ```
 
-Change this to another path if your Windows username is different or you want a different drive/folder.
+Or use command line:
 
-- **Author / branding**
-
-In the `show_credits()` function you can change:
-
-```python
-print("Created by: Kavyant (Aura Lab / Care Lab Studio)")
+```bash
+set HF_TOKEN=hf_your_token_here
+python AI_2.py
 ```
 
-to your preferred name or brand.
+## 🔧 Usage
 
-- **Festivals list**
+Run the application:
 
-The India 2026 and world fixed‑date festivals are defined at the top in:
-
-```python
-INDIA_FESTIVALS_2026 = { ... }
-WORLD_FESTIVALS_FIXED = { ... }
+```bash
+python AI_2.py
 ```
 
-You can edit, add, or remove entries as needed.
+Choose from menu options 1-16:
 
 ---
 
-## Roadmap / Ideas
 
-Possible future improvements:
+## 📦 Dependencies
 
-- Add configuration file instead of hard‑coded paths.
-- More years for Indian and world festivals.
-- Export history as JSON/CSV.
-- Package as an installable Python package or Windows executable (.exe).
+- `transformers>=5.5.0`
+- `torch>=2.12.0`
+- `accelerate>=1.13.0`
+- `torchvision>=0.27.0`
+- `huggingface_hub>=1.18.0`
+
+## 🧠 AI Models
+
+- **HunyuanVideo**: Text-to-video generation (Tencent)
+- **Gemma 4-E4B-it**: Local multimodal AI chat (Google)
+- **Gemma 4-E2B-it**: Smaller version (1GB, recommended for low disk space)
+
+## 💻 System Requirements
+
+- **Disk Space**: 16GB+ for Gemma 4-E4B, 2-3GB for Gemma 4-E2B
+- **RAM**: 8GB+ recommended
+- **GPU**: CUDA-compatible NVIDIA GPU for faster inference
+
+## 📝 License
+
+MIT License
+
+## 🤝 Contributing
+
+Feel free to submit issues and enhancement requests!
+
+## 📮 Contact
+
+- **GitHub**: Kiik913
+- **Project**: AI-2
+
+## 🎯 Quick Start
+
+```bash
+# 1. Install dependencies
+pip install -U transformers==5.5.0 torch accelerate torchvision
+
+# 2. Set HF_TOKEN
+set HF_TOKEN=hf_your_token_here
+
+# 3. Run AI 2
+python AI_2.py
+
+# 4. Choose option 15 or 16
+```
 
 ---
 
+**Made with ❤️ for Aura Lab projects**
 ## Credits
 
 - **Author:** Kavyant – Aura Lab / Care Lab Studio  
