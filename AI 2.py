@@ -5,6 +5,13 @@ import math
 import urllib.parse
 import subprocess
 
+# NEW: Hugging Face video client
+from huggingface_hub import InferenceClient  # <--- ADD
+
+# NEW: Gemma 4 multimodal (local AI)
+from transformers import AutoProcessor, AutoModelForMultimodalLM  # <--- ADD
+import torch  # <--- ADD for device/dtype support
+os.environ['HF_TOKEN'] = 'hf_your_actual_token_here'
 # ==============================
 # CONFIGURATION
 # ==============================
@@ -21,6 +28,15 @@ FAVORITES_FILE = "favorites_prompts.txt"
 HISTORY_DIR = r"C:\Users\HP\AI 2 History"
 os.makedirs(HISTORY_DIR, exist_ok=True)
 APP_HISTORY_FILE = os.path.join(HISTORY_DIR, "AI 2 history.txt")
+
+# NEW: Folder to save generated videos
+VIDEO_DIR = os.path.join(HISTORY_DIR, "AI 2 Videos")
+os.makedirs(VIDEO_DIR, exist_ok=True)
+
+# NEW: Gemma 4 model cache and settings
+GEMMA4_MODEL_ID = "google/gemma-4-E4B-it"
+GEMMA4_CACHE_DIR = os.path.join(HISTORY_DIR, "AI 2 Gemma4")
+os.makedirs(GEMMA4_CACHE_DIR, exist_ok=True)
 
 # ==============================
 # HISTORY LOGGER
@@ -509,6 +525,204 @@ def run_prompt_helper():
         print("Paste the prompt into the prompt/description box and click Generate.\n")
 
 # ==============================
+# NEW: TEXT‑TO‑VIDEO (HUNYUANVIDEO)
+# ==============================
+
+def run_text_to_video():
+    print("==============================================")
+    print("  AI Video (HunyuanVideo via Hugging Face)")
+    print("==============================================\n")
+    print("This will use your HF_TOKEN environment variable and fal.ai provider.")
+    print("Make sure you have:\n")
+    print("  1) pip install huggingface_hub")
+    print("  2) Set HF_TOKEN to your Hugging Face token in Windows:")
+    print("     set HF_TOKEN=your_token_here\n")
+
+    prompt = input("Enter your video prompt (or 'back' to cancel): ").strip()
+    if not prompt or prompt.lower() == "back":
+        log_history("Text-to-video: user cancelled or empty prompt")
+        return
+
+    hf_token = os.getenv("HF_TOKEN")
+    if not hf_token:
+        print("ERROR: HF_TOKEN environment variable not set.")
+        print("Set HF_TOKEN first, then run again.\n")
+        log_history("Text-to-video: missing HF_TOKEN env var")
+        input("Press Enter to return to the main menu...")
+        return
+
+    try:
+        log_history(f"Text-to-video: starting generation for prompt='{prompt}'")
+        client = InferenceClient(
+            provider="fal-ai",
+            api_key=hf_token,
+        )
+
+        # You can tweak model or extra params here if needed
+        video_bytes = client.text_to_video(
+            prompt,
+            model="tencent/HunyuanVideo",
+        )  # returns bytes [web:43][web:38]
+
+        # Save file
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        safe_name = "".join(c if c.isalnum() or c in (" ", "_", "-") else "_" for c in prompt[:40])
+        if not safe_name.strip():
+            safe_name = "video"
+        filename = f"{ts}_{safe_name}.mp4"
+        out_path = os.path.join(VIDEO_DIR, filename)
+
+        with open(out_path, "wb") as f:
+            f.write(video_bytes)
+
+        print("\nVideo generated and saved to:")
+        print(" ", out_path, "\n")
+        log_history(f"Text-to-video: saved video to {out_path}")
+
+        # Ask to open in default player
+        open_choice = input("Open the video now? (y/n): ").strip().lower()
+        if open_choice == "y":
+            os.startfile(out_path)  # Windows shortcut
+            log_history(f"Text-to-video: opened video file {out_path}")
+    except Exception as e:
+        print("Error while generating video:", e, "\n")
+        log_history(f"Text-to-video error: {e}")
+        input("Press Enter to return to the main menu...")
+
+# ==============================
+# NEW: GEMMA 4 MULTIMODAL AI (LOCAL)
+# ==============================
+
+def load_gemma4_model():
+    """
+    Load Gemma 4 E4B multimodal model and processor.
+    This downloads the model once and caches it in HISTORY_DIR.
+    Returns (processor, model) or (None, None) if setup is missing.
+    """
+    print("Loading Gemma 4 E4B multimodal model...\n")
+
+    try:
+        # Load processor and model from Hugging Face
+        processor = AutoProcessor.from_pretrained(
+            GEMMA4_MODEL_ID,
+            cache_dir=GEMMA4_CACHE_DIR,
+        )
+        model = AutoModelForMultimodalLM.from_pretrained(
+            GEMMA4_MODEL_ID,
+            cache_dir=GEMMA4_CACHE_DIR,
+            device_map="auto",
+            torch_dtype=torch.bfloat16,
+        ).eval()
+
+        log_history(f"Gemma 4: loaded model {GEMMA4_MODEL_ID}")
+        return processor, model
+    except Exception as e:
+        print(f"Error loading Gemma 4 model: {e}\n")
+        print("Make sure you have:\n")
+        print("  pip install -U transformers torch accelerate\n")
+        log_history(f"Gemma 4 load error: {e}")
+        return None, None
+
+def chat_with_gemma4():
+    """
+    Interactive chat with Gemma 4 multimodal AI (text only for now).
+    This uses the chat template with Gemma 4.
+    """
+    print("==============================================")
+    print("  Gemma 4 Multimodal AI (Local)")
+    print("==============================================\n")
+
+    # Check dependencies
+    try:
+        import transformers as tf
+        version = tf.__version__
+        print(f"transformers version: {version}")
+        if version < "5.5.0":
+            print("WARNING: Gemma 4 requires transformers >= 5.5.0")
+            print("Run: pip install -U transformers torch accelerate\n")
+            input("Press Enter to continue anyway...")
+    except Exception:
+        print("Could not check transformers version.\n")
+
+    # Load model
+    processor, model = load_gemma4_model()
+    if processor is None or model is None:
+        print("Gemma 4 model not loaded. Exiting chat.\n")
+        input("Press Enter to return to the main menu...")
+        return
+
+    print("Model loaded successfully!")
+    print("You can now chat with Gemma 4 locally (offline once downloaded).\n")
+    print("Type your message, or 'quit' to exit.\n")
+
+    conversation = []
+
+    while True:
+        user_input = input("You: ").strip()
+        if not user_input:
+            continue
+        if user_input.lower() == "quit":
+            log_history("Gemma 4: user quit chat")
+            break
+
+        # Build messages with chat template
+        messages = conversation + [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": user_input},
+                ],
+            },
+        ]
+
+        try:
+            # Apply chat template
+            inputs = processor.apply_chat_template(
+                messages,
+                add_generation_prompt=True,
+                tokenize=True,
+                return_dict=True,
+                return_tensors="pt",
+            ).to(model.device)
+
+            # Generate response
+            output = model.generate(
+                **inputs,
+                max_new_tokens=512,
+                do_sample=False,
+            )
+
+            # Decode response
+            input_len = inputs["input_ids"].shape[-1]
+            response = processor.decode(output[0][input_len:], skip_special_tokens=True)
+
+            print("\nGemma 4:", response)
+            print()
+
+            # Add response to conversation
+            conversation.append({
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": user_input},
+                ],
+            })
+            conversation.append({
+                "role": "assistant",
+                "content": [
+                    {"type": "text", "text": response},
+                ],
+            })
+
+            log_history(f"Gemma 4 chat: user='{user_input}', ai='{response[:100]}...'")
+
+        except Exception as e:
+            print("Error generating response:", e, "\n")
+            log_history(f"Gemma 4 chat error: {e}")
+
+    print("Chat ended.\n")
+    input("Press Enter to return to the main menu...")
+
+# ==============================
 # MATH SOLVER
 # ==============================
 
@@ -875,7 +1089,7 @@ def show_help():
 
     print("4) Festivals & Date/Time")
     print("   - Main menu option 7: 'Date / Time / Festivals (India + World)'.")
-    print("   - Shows today’s date, time, and any fixed-date festivals for 2026.")
+    print("   - Shows today's date, time, and any fixed-date festivals for 2026.")
     print("   - Includes separate lists for India festivals and world fixed-date days.")
     print("   - Also shows a note explaining movable festivals (like Diwali, Eid, etc.).\n")
 
@@ -890,9 +1104,25 @@ def show_help():
     print("   - Google Products (option 10) opens many Google / Workspace apps.")
     print("   - Aura Lab / Social Links (option 11) open your CodePen, Instagram, GitHub, etc.\n")
 
-    print("7) Aura Lab Hub")
+    print("7) AI Video (HunyuanVideo)")
+    print("   - Main menu option 15: 'AI Video (Text → Video)'.")
+    print("   - You type a text prompt (example: 'a young man walking on the street').")
+    print("   - AI 2 calls HunyuanVideo via Hugging Face + fal.ai to generate an .mp4.")
+    print("   - The video is saved in:")
+    print("       C:\\Users\\HP\\AI 2 History\\AI 2 Videos\n")
+
+    print("8) Gemma 4 Multimodal AI (Local)")
+    print("   - Main menu option 16: 'Gemma 4 AI Chat (Local Offline)'.")
+    print("   - This loads google/gemma-4-E4B-it (multimodal multimodal LM) locally.")
+    print("   - You can chat with it offline (after first download).")
+    print("   - Model is cached in:")
+    print("       C:\\Users\\HP\\AI 2 History\\AI 2 Gemma4\n")
+
+    print("9) Aura Lab Hub")
     print("   - AI 2 is your offline hub for:")
     print("       * Image prompts for Perchance / Stable Diffusion")
+    print("       * AI video generation (HunyuanVideo)")
+    print("       * Local AI chat (Gemma 4 multimodal)")
     print("       * Study help (math, physics, formulas)")
     print("       * Quick launchers for Google, Wiki, and your Aura Lab links")
     print("       * History of what you did, saved on your own PC")
@@ -909,7 +1139,7 @@ def show_credits():
     print("==============================================")
     print("  Credits")
     print("==============================================\n")
-    print("AI 2: Prompts + Math + Google + Wiki + Festivals + History")
+    print("AI 2: Prompts + Math + Google + Wiki + Festivals + History + AI Video + Gemma 4")
     print("Created by: Kavyant (Aura Lab / Care Lab Studio)")
     print("Assistant / ideas: Perplexity AI\n")
     print("Main Features:")
@@ -917,13 +1147,17 @@ def show_credits():
     print(" - Prompt styles (default, photo, anime, pixel, cinematic)")
     print(" - Auto-copy prompt to clipboard (Windows) + auto-open Perchance")
     print(" - Favorite prompts list and viewer")
+    print(" - AI text-to-video using HunyuanVideo via Hugging Face (fal.ai provider)")
+    print(" - Local multimodal AI chat using Gemma 4 E4B (google/gemma-4-E4B-it)")
     print(" - Math tools and formulas (basic to class 12 style)")
     print(" - Physics formulas (school level)")
     print(" - Quick launchers for Google & Workspace apps")
     print(" - Date/Time with India + world festivals list")
     print(" - Full history logging to 'C:\\Users\\HP\\AI 2 History\\AI 2 history.txt'")
-    print(" - Local folder for saving screenshots from any device:\n")
-    print("     C:\\Users\\HP\\AI 2 History\n")
+    print(" - Local folders for saving history, AI videos, and Gemma 4 cache:\n")
+    print("     C:\\Users\\HP\\AI 2 History")
+    print("     C:\\Users\\HP\\AI 2 History\\AI 2 Videos")
+    print("     C:\\Users\\HP\\AI 2 History\\AI 2 Gemma4\n")
     print("Aura Lab / Care Lab Studio Links:")
     print(" - Cares & Laughs 2 (CodePen): https://codepen.io/Kavyant-Kumar/pen/dPOXwmY")
     print(" - Cares & Laughs 1 (CodePen): https://codepen.io/Kavyant-Kumar/pen/dPGJPKj")
@@ -945,23 +1179,25 @@ def main():
     log_history("=== AI 2 app started ===")
     while True:
         print("==============================================")
-        print("  AI 2: Prompts + Math + Google + Wiki + Festivals")
+        print("  AI 2: Prompts + Math + Google + Wiki + Festivals + AI Video + Gemma 4")
         print("==============================================")
-        print("1. Prompt + Image Helper (auto Perchance)")
-        print("2. View Favorite Prompts")
-        print("3. Math Solver (Calculator)")
-        print("4. Extra Math Tools")
-        print("5. Math Formulas")
-        print("6. Physics Formulas")
-        print("7. Date / Time / Festivals (India + World)")
-        print("8. Wikipedia Home")
-        print("9. Wikipedia Search")
+        print("1.  Prompt + Image Helper (auto Perchance)")
+        print("2.  View Favorite Prompts")
+        print("3.  Math Solver (Calculator)")
+        print("4.  Extra Math Tools")
+        print("5.  Math Formulas")
+        print("6.  Physics Formulas")
+        print("7.  Date / Time / Festivals (India + World)")
+        print("8.  Wikipedia Home")
+        print("9.  Wikipedia Search")
         print("10. Google Products")
         print("11. Aura Lab / Social Links")
         print("12. Help – How to use AI 2")
         print("13. Credits")
         print("14. Exit")
-        choice = input("Choose 1-14: ").strip()
+        print("15. AI Video (Text → Video, HunyuanVideo)")
+        print("16. Gemma 4 AI Chat (Local Offline)")
+        choice = input("Choose 1-16: ").strip()
         log_history(f"Main menu choice: {choice}")
 
         if choice == "1":
@@ -994,8 +1230,12 @@ def main():
             print("Goodbye!")
             log_history("=== AI 2 app exited by user ===")
             break
+        elif choice == "15":
+            run_text_to_video()
+        elif choice == "16":
+            chat_with_gemma4()
         else:
-            print("Invalid choice. Enter 1-14.\n")
+            print("Invalid choice. Enter 1-16.\n")
             log_history(f"Invalid main menu choice: {choice}")
 
 if __name__ == "__main__":
