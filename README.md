@@ -2,6 +2,9 @@
 
 A powerful Python-based AI application with multiple features including prompts, math, video generation, chat, and history logging.
 
+**Screenshort**
+<img width="1920" height="1046" alt="Screenshot 2026-07-07 160319" src="https://github.com/user-attachments/assets/c57b4162-028b-4069-bebf-e206c476df6e" />
+
 ## ✨ Features
 
 - **1️⃣ AI Prompts**: Get smart answers and help with tasks
